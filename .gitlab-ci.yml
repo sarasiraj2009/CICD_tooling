@@ -1,0 +1,15 @@
+build-job:
+  stage: build
+  script:
+    - echo "This is a Build Stage"
+
+test-job:
+  stage: test
+  script:
+    - echo "This is a test stage"
+
+deploy-prod:
+  stage: deploy
+  script:
+    - echo "This is a deploy stage"
+  environment: production

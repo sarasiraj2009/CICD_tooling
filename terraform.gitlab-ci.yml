@@ -1,0 +1,50 @@
+technical:
+  stage: test
+
+variables:
+  TF_VAR_aws_secret_key: $TF_VAR_aws_secret_key
+  TF_VAR_aws_access_key: $TF_VAR_aws_access_key
+  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID    
+  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+
+stages:
+- test
+- validate
+- plan
+- apply
+
+image:
+  name: hashicorp/terraform:light
+  entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+before_script:
+  - rm -rf .terraform
+  - terraform --version
+  - echo $TF_VAR_aws_access_key
+
+validate:
+  stage: validate
+  script:
+    - terraform init
+    - terraform validate
+
+plan:
+  stage: plan
+  script:
+    - terraform init
+    - terraform plan -out "planfile"
+  dependencies:
+    - validate
+  artifacts:
+    paths:
+      - planfile
+
+apply:
+  stage: apply
+  script:
+    - terraform apply -input=false "planfile"
+  dependencies:
+    - plan
+  when: manual
